@@ -1,5 +1,8 @@
 import json
 from typing import List, Dict
+from class_decorator import register_tool
+
+@register_tool(tag=["get_search_criteria"])
 def get_search_criteria() -> dict:
     """Prompt user for home search criteria and return them as a dictionary."""
     location = input("Enter the desired location (e.g., Sloan Lake, Denver): ").strip()
@@ -32,17 +35,18 @@ def get_search_criteria() -> dict:
         }
     }
 
-def partial_search_property(prop, criteria):
-    return all(prop.get(k) == v if k != "year_built" else prop.get(k) >= v for k, v in criteria.items())
 
 
+@register_tool(tag=["search_property"])
 def search_property(search_criteria: dict, partial_search=True) -> list[dict]:
     """search for property based on a set of criterias"""
     file_path = "./data/property_data.json"
 
     with open(file_path, "r") as f:
         properties = json.load(f)
-
+    
+    def partial_search_property(prop, criteria):
+        return all(prop.get(k) == v if k != "year_built" else prop.get(k) >= v for k, v in criteria.items())
 
     if partial_search:
         matches = [prop for prop in properties if partial_search_property(prop, search_criteria)]
@@ -60,7 +64,7 @@ def search_property(search_criteria: dict, partial_search=True) -> list[dict]:
     matches[0] = "Could you write a summary of the following options?"
     return { "search_results " : matches} if matches else ["No properties found matching the criteria."]
     
-
+@register_tool(tag=["summarize_options"])
 def summarize_options(search_results: list[dict]) -> list[dict]:
     """summarize the matched properties based on the properties features"""
     if not search_results:

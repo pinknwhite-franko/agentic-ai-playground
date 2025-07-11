@@ -3,7 +3,15 @@ from typing import get_type_hints
 import config
 
 def get_json_type(py_type):
-    """Maps Python types to JSON schema types."""
+    """
+    Maps Python types to JSON schema types.
+
+    Parameters:
+        py_type (object): The Python type to map.
+
+    Returns:
+        str: The corresponding JSON schema type.
+    """
     if py_type in [str]:
         return "string"
     elif py_type in [int]:
@@ -21,7 +29,19 @@ def get_json_type(py_type):
 
 def register_tool(tool_name=None, description=None, 
                  parameters_override=None, terminal=False, tags=None):
-    """Registers a function as an agent tool."""
+    """
+    Registers a function as an agent tool.
+
+    Parameters:
+        tool_name (str, optional): The name of the tool. Defaults to the function name.
+        description (str, optional): Description of the tool. Defaults to the function's docstring.
+        parameters_override (dict, optional): Override for the argument schema. Defaults to dynamically inferred schema.
+        terminal (bool, optional): Whether the tool is terminal. Defaults to False.
+        tags (List[str], optional): List of tags to associate with the tool.
+        
+    Returns:
+        function: The decorated function with tool registration.
+    """
     def decorator(func):
         # Extract all metadata from the function
         metadata = get_tool_metadata(
@@ -54,7 +74,20 @@ def register_tool(tool_name=None, description=None,
 
 def get_tool_metadata(func, tool_name=None, description=None, 
                      parameters_override=None, terminal=False, tags=None):
-    """Extracts metadata for a function to use in tool registration."""
+    """
+    Extracts metadata for a function to use in tool registration.
+
+    Parameters:
+        func (function): The function to extract metadata from.
+        tool_name (str, optional): The name of the tool. Defaults to the function name.
+        description (str, optional): Description of the tool. Defaults to the function's docstring.
+        parameters_override (dict, optional): Override for the argument schema. Defaults to dynamically inferred schema.
+        terminal (bool, optional): Whether the tool is terminal. Defaults to False.
+        tags (List[str], optional): List of tags to associate with the tool.
+
+    Returns:
+        dict: A dictionary containing metadata about the tool, including description, args schema, and the function.
+    """
     
     # Use function name if no tool_name provided
     tool_name = tool_name or func.__name__

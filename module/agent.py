@@ -1,6 +1,6 @@
-from module.function_action import *
-from module.class_game import *
-from module.class_agent_language import *
+from module.register_tools import *
+from module.game import *
+from module.agent_language import *
 from typing import Callable
 class Agent:
     def __init__(self,

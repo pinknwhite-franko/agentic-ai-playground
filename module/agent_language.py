@@ -1,6 +1,6 @@
 from typing import Any
-from module.function_action import *
-from module.class_game import *
+from module.register_tools import *
+from module.game import *
 class AgentLanguage:
     def __init__(self):
         pass

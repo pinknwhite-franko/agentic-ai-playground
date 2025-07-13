@@ -5,6 +5,7 @@ from litellm import completion
 import json
 import time
 import traceback
+import module.config as config
 
 @dataclass(frozen=True) # a data class that cannot be modified
 class Goal:
@@ -92,6 +93,49 @@ class ActionRegistry:
     def get_actions(self) -> List[Action]:
         """Get all registered actions"""
         return list(self.actions.values())
+    
+
+    
+class PythonActionRegistry(ActionRegistry): 
+    def __init__(self, tags: List[str] = None, tool_names: List[str] = None):
+        super().__init__()
+
+        self.terminate_tool = None
+
+        # Register all tools from config
+        # If tool_names is provided and tags are provided, only register those tools
+        # if tool name is terminate, set it as terminate_tool
+        for tool_name, tool_desc in config.TOOLS.items():
+            if tool_name == "terminate":
+                self.terminate_tool = tool_desc
+
+            if tool_names and tool_name not in tool_names:
+                continue
+
+            tool_tags = tool_desc.get("tags", [])
+            if tags and not any(tag in tool_tags for tag in tags):
+                continue
+
+            self.register(Action(
+                name=tool_name,
+                function=tool_desc["function"],
+                description=tool_desc["description"],
+                parameters=tool_desc.get("parameters", {}),
+                terminal=tool_desc.get("terminal", False)
+            ))
+
+    def register_terminate_tool(self):
+        """Register the terminate tool if it exists in the registry"""
+        if self.terminate_tool:
+            self.register(Action(
+                name="terminate",
+                function=self.terminate_tool["function"],
+                description=self.terminate_tool["description"],
+                parameters=self.terminate_tool.get("parameters", {}),
+                terminal=self.terminate_tool.get("terminal", False)
+            ))
+        else:
+            raise Exception("Terminate tool not found in tool registry")
 
     
 class Memory:
@@ -110,6 +154,8 @@ class Memory:
 class Environment:
     def execute_action(self, action: Action, args: Dict) -> dict:
         """Execute an action and return the result."""
+        print("#####")
+        print("Executing action:", action.name, "with args:", args)
         try:
             result = action.execute(**args)
             return self.format_result(result)

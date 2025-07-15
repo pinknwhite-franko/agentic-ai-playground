@@ -7,50 +7,6 @@ from module.agent import *
 import types
 
 
-# action_registry.register(Action(
-#     name="get_search_criteria",
-#     function=get_search_criteria,
-#     description="Prompt user for home search criteria and return them as a dictionary.",
-#     parameters={},
-#     terminal=False
-# ))
-
-# action_registry.register(Action(
-#     name="search_property",
-#     function=search_property,
-#     description="search for property based on search_criteria, return the results as a list",
-#     parameters={
-#         "type": "object",
-#         "properties": {
-#             "search_criteria": {
-#                 "type": "object", 
-#                 "description": "search criteria used to search for the property"
-#             },
-#         },
-#         "required": ["search_criteria"]
-#     },
-#     terminal=False
-# ))
-
-
-# action_registry.register(Action(
-#     name="summarize_options",
-#     function=summarize_options,
-#     description="summarize the matched properties based on the properties features",
-#     parameters={
-#         "type": "object",
-#         "properties": {
-#             "search_results": {
-#                 "type": "object", 
-#                 "description": "search criteria used to search for the property"
-#             },
-#         },
-#         "required": ["search_results"]
-#     },
-#     terminal=False
-# ))
-
-
 # Define clear goals for the agent
 goals = [
     Goal(
@@ -67,8 +23,8 @@ goals = [
 
 # Create and populate the action registry
 action_registry = PythonActionRegistry(
-    tags=["get_search_criteria","search_property", "summarize_options"],
-    tool_names=["get_search_criteria", "search_property", "summarize_options"]
+    tags=["get_search_criteria","search_property", "summarize_options","system"],
+    tool_names=["get_search_criteria", "search_property", "summarize_options", "terminate"]
 )
 
 # print the action registry for debugging
@@ -92,7 +48,7 @@ property_search_agent = Agent(
 
 # Run the agent
 user_input = "search for a property based on my criteria and provide a summary of the options"
-final_memory = property_search_agent.run(user_input, max_iterations=5)
+final_memory = property_search_agent.run(user_input, max_iterations=6)
 
 # Print the termination message (if any)
 for item in final_memory.get_memories():

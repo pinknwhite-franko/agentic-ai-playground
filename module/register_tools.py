@@ -192,15 +192,17 @@ def get_search_criteria() -> dict:
             "has_garage": has_garage,
             "year_built": year_built
         },
-        "instruction":"Please use the search_criteria in this dictionary as input to call the search_property tool to search for properties."
+        "partial_search": partial_search
     }
 
 
 
 @register_tool(tags=["search_property"])
-def search_property(search_criteria: dict) -> list[dict]:
+def search_property(search_criteria: str, partial_search: bool) -> list[dict]:
     """search for property based on a set of criterias"""
     file_path = "./data/property_data.json"
+
+    search_criteria = json.loads(search_criteria)
 
     with open(file_path, "r") as f:
         properties = json.load(f)
@@ -208,7 +210,7 @@ def search_property(search_criteria: dict) -> list[dict]:
     def partial_search_property(prop, criteria):
         return all(prop.get(k) == v if k != "year_built" else prop.get(k) >= v for k, v in criteria.items())
     
-    partial_search = True
+    #partial_search = True
     if partial_search:
         matches = [prop for prop in properties if partial_search_property(prop, search_criteria)]
         print(matches)
@@ -223,7 +225,7 @@ def search_property(search_criteria: dict) -> list[dict]:
                 prop["year_built"] > search_criteria["year_built"]
             ):
                 matches.append(prop)
-    return { "search_results " : matches, "instruction": "Could you write a summary of the following options?"} if matches else ["No properties found matching the criteria."]
+    return { "search_results " : matches} if matches else {["No properties found matching the criteria."]}
     
 @register_tool(tags=["summarize_options"])
 def summarize_options(search_results: list[dict]) -> list[dict]:
@@ -231,8 +233,7 @@ def summarize_options(search_results: list[dict]) -> list[dict]:
     if not search_results:
         return [{"instrustion":"No properties found matching the criteria."}]
     else:
-        search_results[0] = {"instrustion":"Here are the matched properties based on the criteria, could you provide a summary of these properties?"}
-    return search_results
+        return {"search_results": search_results, "instrustion":"Here are the matched properties based on the criteria, could you compare these properties? terminate the session with a helpful summary."}
 
 @register_tool(tags=["system"], terminal=True)
 def terminate(message: str) -> str:
